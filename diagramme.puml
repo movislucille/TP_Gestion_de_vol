@@ -1,0 +1,135 @@
+@startuml
+title Gestion des vols et reservations - Agence de voyage de Cotonou
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBackgroundColor #FDFDFD
+skinparam classBorderColor #333333
+skinparam ArrowColor #333333
+
+enum StatutReservation {
+  EN_ATTENTE
+  CONFIRMEE
+  ANNULEE
+}
+
+enum StatutPaiement {
+  NON_PAYE
+  PAYE
+  A_REMBOURSER
+  REMBOURSE
+}
+
+class Passager {
+  - nom : string
+  - prenom : string
+  - telephone : string
+  - numeroPasseport : string
+  --
+  + Passager(nom, prenom, telephone, numeroPasseport)
+  + getNom() : string
+  + getPrenom() : string
+  + getTelephone() : string
+  + getNumeroPasseport() : string
+  + setTelephone(telephone : string) : void
+  + nomComplet() : string
+  + afficher() : void
+}
+
+class Vol {
+  - numero : string
+  - villeDepart : string
+  - villeArrivee : string
+  - date : string
+  - heure : string
+  - prix : double
+  - capacite : int
+  - placesOccupees : int
+  --
+  + Vol(numero, villeDepart, villeArrivee, date, heure, prix, capacite)
+  + getNumero() : string
+  + getVilleDepart() : string
+  + getVilleArrivee() : string
+  + getDate() : string
+  + getHeure() : string
+  + getPrix() : double
+  + getCapacite() : int
+  + getPlacesRestantes() : int
+  + estComplet() : bool
+  + occuperPlace() : void
+  + libererPlace() : void
+  + afficher() : void
+}
+
+class Paiement {
+  - montant : double
+  - date : string
+  - statut : StatutPaiement
+  --
+  + Paiement(montant, date)
+  + getMontant() : double
+  + getDate() : string
+  + getStatut() : StatutPaiement
+  + marquerARembourser() : void
+  + marquerRembourse() : void
+  + afficher() : void
+}
+
+class Reservation {
+  - numero : string
+  - statut : StatutReservation
+  --
+  + Reservation(numero, passager, vol)
+  + getNumero() : string
+  + getPassager() : Passager
+  + getVol() : Vol
+  + getStatut() : StatutReservation
+  + getPaiement() : Paiement
+  + estPayee() : bool
+  + getStatutPaiement() : StatutPaiement
+  + enregistrerPaiement(date : string) : void
+  + annuler() : void
+  + rembourser() : void
+  + afficher() : void
+  + afficherDetails() : void
+}
+
+class Agence {
+  - nom : string
+  - compteurReservations : int
+  - passagers : vector<Passager>
+  - vols : vector<Vol>
+  - reservations : vector<Reservation>
+  --
+  + Agence(nom)
+  + enregistrerPassager(nom, prenom, telephone, passeport) : void
+  + rechercherPassager(passeport) : Passager
+  + getPassagers() : vector<Passager>
+  + ajouterVol(numero, depart, arrivee, date, heure, prix, capacite) : void
+  + rechercherVol(numero) : Vol
+  + volsDisponibles() : vector<Vol>
+  + reserver(passeport, numeroVol) : string
+  + obtenirReservation(numero) : Reservation
+  + reservationsDuPassager(passeport) : vector<Reservation>
+  + getReservations() : vector<Reservation>
+  + enregistrerPaiement(numeroReservation) : void
+  + annulerReservation(numeroReservation) : bool
+  + rembourser(numeroReservation) : void
+  - genererNumeroReservation() : string
+}
+
+' Associations entre l'agence et ses collections
+Agence "1" o-- "0..*" Passager : gere >
+Agence "1" o-- "0..*" Vol : propose >
+Agence "1" *-- "0..*" Reservation : enregistre >
+
+' Une reservation concerne un seul passager et un seul vol (regle 4)
+Reservation "0..*" --> "1" Passager : concerne >
+Reservation "0..*" --> "1" Vol : porte sur >
+
+' Une reservation a au plus un paiement
+Reservation "1" *-- "0..1" Paiement : est reglee par >
+
+' Utilisation des enumerations
+Reservation ..> StatutReservation
+Paiement ..> StatutPaiement
+@enduml
